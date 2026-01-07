@@ -52,6 +52,7 @@ async function seedDB() {
 		}
 
 		const product = {
+			_id: new mongodb.ObjectId(),
 			category_id: category._id,
 			name: faker.commerce.productName(),
 			description: faker.commerce.productDescription(),
@@ -134,7 +135,7 @@ async function seedDB() {
 					const review = {
 						_id: new mongodb.ObjectId(),
 						user_id: user._id,
-						product_id: item._id,
+						product_id: item.product_id,
 						rating: faker.number.int({min: 1, max: 5}),
 						comment: faker.lorem.sentences(randomIntFromInterval(1, 3)),
 						created_at: faker.date.between({from: created_at, to: now}),
@@ -149,7 +150,7 @@ async function seedDB() {
 			const order = {
 				_id: new mongodb.ObjectId(),
 				user_id: user._id,
-				address_id: address,
+				address_id: address._id,
 				status: status,
 				total_amount: total_amount,
 				created_at: created_at,
@@ -167,16 +168,22 @@ async function seedDB() {
 
 	console.log("generated")
 
+	await db.collection("users").deleteMany();
 	await db.collection("users").insertMany(users);
 
+	await db.collection("addresses").deleteMany();
 	await db.collection("addresses").insertMany(addresses);
 
+	await db.collection("categories").deleteMany();
 	await db.collection("categories").insertMany(categories);
 
+	await db.collection("products").deleteMany();
 	await db.collection("products").insertMany(products);
 
+	await db.collection("reviews").deleteMany();
 	await db.collection("reviews").insertMany(reviews);
 
+	await db.collection("orders").deleteMany();
 	await db.collection("orders").insertMany(orders);
 
 	console.log("inserted")
