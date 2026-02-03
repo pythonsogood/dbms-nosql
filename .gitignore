@@ -1,11 +1,10 @@
-# Dependency directory
-node_modules
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
 
-# Optional npm cache directory
-.npm
-
-*.map
-
-dist
-
-.env
+# Virtual environments
+.venv
