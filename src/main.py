@@ -1,24 +1,36 @@
 import asyncio
 import os
+from contextlib import asynccontextmanager
 
+import fastapi
+import uvicorn
 from beanie import init_beanie
-from dotenv import load_dotenv
-from pymongo import AsyncMongoClient
 
+import config
+from api import dependencies, router as api_router
 from models import Address, Order, Product, ProductCategory, User
 
 
-async def main():
-	client = AsyncMongoClient(os.getenv("MONGODB_CONNECTION"))
+@asynccontextmanager
+async def lifespan(app: fastapi.FastAPI):
+	mongo = dependencies.database()
 
-	await init_beanie(database=client[os.getenv("MONGODB_DATABASE")], document_models=[User, Address, ProductCategory, Product, Order])
+	document_models = [User, Address, ProductCategory, Product, Order]
 
-	User(username="asd", email="asd", first_name="asd", last_name="asd", password_hash="asd", phone_number="asd", cart=[])
+	await init_beanie(database=mongo[config.MONGODB_DATABASE], document_models=document_models, allow_index_dropping=True)
 
-	while True:
-		await asyncio.sleep(3)
+	yield
+
+
+app = fastapi.FastAPI(lifespan=lifespan)
+app.include_router(api_router, prefix="/api")
+
+def main() -> None:
+	if os.name == "nt":
+		asyncio.set_event_loop_policy(asyncio._WindowsSelectorEventLoopPolicy())
+
+	uvicorn.run(app, host="0.0.0.0", port=config.PORT)
 
 
 if __name__ == "__main__":
-	load_dotenv(".env")
 	asyncio.run(main())
