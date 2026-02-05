@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="auth-container shadow-lg">
+        <h3 class="fw-bold text-center mb-4">Welcome Back</h3>
+        <form method="POST">
+            <div class="mb-3">
+                <label class="form-label small text-muted">Email Address</label>
+                <input type="email" name="email" class="form-control p-3" placeholder="user@example.com" required>
+            </div>
+            <div class="mb-4">
+                <label class="form-label small text-muted">Password</label>
+                <input type="password" name="password" class="form-control p-3" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn btn-red w-100 py-3 mb-3">Sign In</button>
+            <div class="text-center">
+                <a href="/register" class="text-muted small text-decoration-none">Create an account</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero-section">
+    <div>
+        <h5 class="text-uppercase letter-spacing-2 mb-3">New Season</h5>
+        <h1 class="hero-title mb-4">2026<br>LOOKBOOK.</h1>
+        <a href="/shop" class="btn btn-red mt-3">See More</a>
+    </div>
+</section>
+
+<section class="container py-5 my-5">
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="p-5 bg-light h-100 d-flex align-items-center">
+                <div>
+                    <span class="text-muted text-uppercase small">Collection</span>
+                    <h2 class="fw-bold mb-3">Men's Streetwear</h2>
+                    <a href="/shop?cat=men" class="text-dark text-decoration-underline fw-bold">Shop Now</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="p-5 bg-light h-100 d-flex align-items-center" style="background-color: #ffeaea !important;">
+                <div>
+                    <span class="text-danger text-uppercase small">Trending</span>
+                    <h2 class="fw-bold mb-3">Women's Exclusive</h2>
+                    <a href="/shop?cat=women" class="text-danger text-decoration-underline fw-bold">Shop Now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="container mb-5">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <h3 class="fw-bold">Latest Drops</h3>
+        <a href="/shop" class="text-muted text-decoration-none">View All</a>
+    </div>
+    
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+        {% for product in featured_products %}
+        <div class="col">
+            <div class="card product-card h-100">
+                <a href="/product/{{ product._id }}" class="product-img-wrapper">
+                    <img src="{{ product.image_url }}" alt="{{ product.name }}">
+                </a>
+                <div class="card-body text-center">
+                    <h6 class="card-title fw-bold mb-1">{{ product.name }}</h6>
+                    <p class="text-muted small mb-2">{{ product.category }}</p>
+                    <div class="price-tag">${{ product.price }}</div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

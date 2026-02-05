@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-3 mb-4">
+            <h5 class="fw-bold mb-3">Filters</h5>
+            <div class="mb-4">
+                <h6 class="text-uppercase small text-muted">Categories</h6>
+                <ul class="list-unstyled mt-2">
+                    <li><a href="#" class="text-dark text-decoration-none">All Products</a></li>
+                    <li><a href="#" class="text-muted text-decoration-none">Outerwear</a></li>
+                    <li><a href="#" class="text-muted text-decoration-none">Tees & Tops</a></li>
+                    <li><a href="#" class="text-muted text-decoration-none">Accessories</a></li>
+                </ul>
+            </div>
+            <div class="mb-4">
+                <h6 class="text-uppercase small text-muted">Price Range</h6>
+                <input type="range" class="form-range mt-2" id="priceRange">
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <span class="text-muted">Showing {{ products|length }} results</span>
+                <select class="form-select w-auto border-0 bg-light">
+                    <option>Sort by: Newest</option>
+                    <option>Price: Low to High</option>
+                    <option>Price: High to Low</option>
+                </select>
+            </div>
+
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for product in products %}
+                <div class="col">
+                    <div class="card product-card h-100">
+                        <a href="/product/{{ product._id }}" class="product-img-wrapper">
+                            <img src="{{ product.image_url }}" alt="{{ product.name }}">
+                        </a>
+                        <div class="card-body">
+                            <h6 class="card-title fw-bold">{{ product.name }}</h6>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="price-tag">${{ product.price }}</span>
+                                <button class="btn btn-sm btn-outline-dark rounded-circle"><i class="bi bi-plus"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

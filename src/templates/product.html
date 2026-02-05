@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row g-5">
+        <div class="col-md-6">
+            <div class="bg-light rounded overflow-hidden shadow-sm">
+                <img src="{{ product.image_url or 'https://via.placeholder.com/600x800?text=No+Image' }}" 
+                     alt="{{ product.name }}" 
+                     class="img-fluid w-100" 
+                     style="object-fit: cover; min-height: 500px;">
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="sticky-top" style="top: 100px; z-index: 1;">
+                <nav aria-label="breadcrumb" class="mb-3">
+                    <ol class="breadcrumb bg-transparent p-0">
+                        <li class="breadcrumb-item"><a href="/shop" class="text-muted text-decoration-none">Shop</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">{{ product.category }}</li>
+                    </ol>
+                </nav>
+
+                <h1 class="fw-bold display-5 mb-2">{{ product.name }}</h1>
+                <p class="fs-4 fw-bold text-danger mb-4">${{ product.price }}</p>
+
+                <p class="text-muted mb-4 leading-relaxed">
+                    {{ product.description or 'Premium streetwear designed for comfort and style. Made from high-quality materials tailored for the modern urban aesthetic.' }}
+                </p>
+
+                <form action="/add_to_cart/{{ product._id }}" method="POST">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-uppercase small">Select Size</label>
+                        <div class="d-flex gap-2">
+                            {% for size in ['S', 'M', 'L', 'XL'] %}
+                            <input type="radio" class="btn-check" name="size" id="size-{{ size }}" value="{{ size }}" required>
+                            <label class="btn btn-outline-dark px-4 rounded-0" for="size-{{ size }}">{{ size }}</label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-3">
+                            <input type="number" name="quantity" class="form-control form-control-lg text-center border-dark" value="1" min="1" max="{{ product.stock }}">
+                        </div>
+                        <div class="col-9">
+                            <button type="submit" class="btn btn-red w-100 btn-lg rounded-0">
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="mt-5 border-top pt-4">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-truck me-2"></i> <span>Free shipping on orders over $150</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-arrow-return-left me-2"></i> <span>30-day return policy</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
