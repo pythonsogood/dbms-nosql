@@ -9,3 +9,4 @@ __all__ = ("Database", "database", "Auth", "auth")
 
 from .database import Database, database
 from .auth import Auth, auth
+from .templates import Templates, templates

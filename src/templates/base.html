@@ -1,95 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>.red | Premium Streetwear</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>.red | Premium Streetwear</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+	<link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
 </head>
 <body>
+	<nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top py-3 shadow-sm">
+		<div class="container">
+			<a class="navbar-brand" href="/">.red</a>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarNav">
+				<ul class="navbar-nav ms-auto align-items-center">
+					<li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+					<li class="nav-item"><a class="nav-link" href="/shop">Shop</a></li>
+					<li class="nav-item"><a class="nav-link" href="/admin">Admin</a></li>
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top py-3 shadow-sm">
-        <div class="container">
-            <a class="navbar-brand" href="/">.red</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/shop">Shop</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/admin">Admin</a></li>
-                    
-                    {% if session.get('user') %}
-                        <li class="nav-item ms-3">
-                            <span class="text-muted small">Hi, {{ session['user']['name'] }}</span>
-                        </li>
-                        <li class="nav-item ms-3">
-                            <a href="/logout" class="btn btn-sm btn-outline-dark">Logout</a>
-                        </li>
-                    {% else %}
-                        <li class="nav-item ms-3">
-                            <a href="/login" class="nav-link">Login</a>
-                        </li>
-                    {% endif %}
+					{% if user is defined %}
+						<li class="nav-item ms-3">
+							<span class="text-muted small">Hi, {{ user.first_name }}</span>
+						</li>
+						<li class="nav-item ms-3">
+							<a href="/logout" class="btn btn-sm btn-outline-dark">Logout</a>
+						</li>
+					{% else %}
+						<li class="nav-item ms-3">
+							<a href="/login" class="nav-link">Login</a>
+						</li>
+					{% endif %}
 
-                    <li class="nav-item ms-3">
-                        <a href="/cart" class="position-relative text-dark">
-                            <i class="bi bi-bag" style="font-size: 1.5rem;"></i>
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
-                                2
-                            </span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+					<li class="nav-item ms-3">
+						<a href="/cart" class="position-relative text-dark">
+							<i class="bi bi-bag" style="font-size: 1.5rem;"></i>
+							<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+								2
+							</span>
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</nav>
 
-    <div style="margin-top: 80px;"> {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="container mt-3">
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }}">{{ message }}</div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
-        
-        {% block content %}{% endblock %}
-    </div>
+	<div style="margin-top: 80px;"> {% with messages = get_flashed_messages(with_categories=true) %}
+			{% if messages %}
+				<div class="container mt-3">
+					{% for category, message in messages %}
+						<div class="alert alert-{{ category }}">{{ message }}</div>
+					{% endfor %}
+				</div>
+			{% endif %}
+		{% endwith %}
 
-    <footer class="bg-dark text-white py-5 mt-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4">
-                    <h4 class="text-uppercase fw-bold mb-3">.red</h4>
-                    <p class="text-muted">Premium streetwear for the modern era. Designed in Almaty.</p>
-                </div>
-                <div class="col-md-4">
-                    <h6 class="text-uppercase">Links</h6>
-                    <ul class="list-unstyled text-muted">
-                        <li><a href="#" class="text-decoration-none text-muted">About Us</a></li>
-                        <li><a href="#" class="text-decoration-none text-muted">Shipping</a></li>
-                        <li><a href="#" class="text-decoration-none text-muted">Returns</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-4">
-                    <h6 class="text-uppercase">Newsletter</h6>
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control" placeholder="Email address">
-                        <button class="btn btn-outline-light" type="button">Subscribe</button>
-                    </div>
-                </div>
-            </div>
-            <hr class="border-secondary">
-            <p class="text-center text-muted small mb-0">&copy; 2026 .red Fashion Store. Final Project.</p>
-        </div>
-    </footer>
+		{% block content %}{% endblock %}
+	</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	<footer class="bg-dark text-white py-5 mt-5">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-4">
+					<h4 class="text-uppercase fw-bold mb-3">.red</h4>
+					<p class="text-muted">Premium streetwear for the modern era. Designed in Almaty.</p>
+				</div>
+				<div class="col-md-4">
+					<h6 class="text-uppercase">Links</h6>
+					<ul class="list-unstyled text-muted">
+						<li><a href="#" class="text-decoration-none text-muted">About Us</a></li>
+						<li><a href="#" class="text-decoration-none text-muted">Shipping</a></li>
+						<li><a href="#" class="text-decoration-none text-muted">Returns</a></li>
+					</ul>
+				</div>
+				<div class="col-md-4">
+					<h6 class="text-uppercase">Newsletter</h6>
+					<div class="input-group mb-3">
+						<input type="text" class="form-control" placeholder="Email address">
+						<button class="btn btn-outline-light" type="button">Subscribe</button>
+					</div>
+				</div>
+			</div>
+			<hr class="border-secondary">
+			<p class="text-center text-muted small mb-0">&copy; 2026 .red Fashion Store. Final Project.</p>
+		</div>
+	</footer>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

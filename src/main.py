@@ -5,9 +5,10 @@ from contextlib import asynccontextmanager
 import fastapi
 import uvicorn
 from beanie import init_beanie
+from fastapi.staticfiles import StaticFiles
 
 import config
-from api import dependencies, router as api_router
+from api import dependencies, api_router, templates_router
 from models import Address, Order, Product, ProductCategory, User
 
 
@@ -21,15 +22,18 @@ async def lifespan(app: fastapi.FastAPI):
 
 	yield
 
-
 app = fastapi.FastAPI(lifespan=lifespan)
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 app.include_router(api_router, prefix="/api")
+app.include_router(templates_router)
 
 def main() -> None:
 	if os.name == "nt":
 		asyncio.set_event_loop_policy(asyncio._WindowsSelectorEventLoopPolicy())
 
-	uvicorn.run(app, host="0.0.0.0", port=config.PORT)
+	uvicorn.run("main:app", host="0.0.0.0", port=config.PORT, reload=True)
 
 
 if __name__ == "__main__":

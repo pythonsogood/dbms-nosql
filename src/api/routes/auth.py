@@ -1,4 +1,5 @@
 from typing import Annotated
+
 import fastapi
 from pydantic import BaseModel
 
@@ -13,7 +14,7 @@ class LoginRequest(BaseModel):
 	password: str
 
 
-@router.post("/login")
+@router.post("/login", response_class=fastapi.responses.ORJSONResponse)
 async def login(login_request: LoginRequest):
 	user = await User.find_one({"username": login_request.username})
 
@@ -22,6 +23,6 @@ async def login(login_request: LoginRequest):
 
 	return {"status": "success", "data": user.create_jwt_token()}
 
-@router.get("/whoami")
+@router.get("/whoami", response_class=fastapi.responses.ORJSONResponse)
 async def whoami(user: Annotated[User, fastapi.Depends(auth)]):
 	return {"status": "success", "data": f"Hello, {user.username}"}
