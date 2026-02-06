@@ -89,7 +89,7 @@ async def edit_review(user: Annotated[User, fastapi.Depends(auth)], product_id: 
 	return {"status": "success", "message": "Review added"}
 
 @router.put("/cart/{product_id}", response_class=fastapi.responses.ORJSONResponse)
-async def add_to_cart(user: Annotated[User, fastapi.Depends(auth)], product_id: Annotated[str, fastapi.Body(embed=True)]):
+async def add_to_cart(user: Annotated[User, fastapi.Depends(auth)], product_id: Annotated[str, fastapi.Path(embed=True)]):
 	product = await Product.get(product_id)
 
 	if product is None:
@@ -102,7 +102,7 @@ async def add_to_cart(user: Annotated[User, fastapi.Depends(auth)], product_id: 
 	return {"status": "success", "message": "Product added to cart"}
 
 @router.delete("/cart/{product_id}", response_class=fastapi.responses.ORJSONResponse)
-async def remove_from_cart(user: Annotated[User, fastapi.Depends(auth)], product_id: Annotated[str, fastapi.Body(embed=True)]):
+async def remove_from_cart(user: Annotated[User, fastapi.Depends(auth)], product_id: Annotated[str, fastapi.Path(embed=True)]):
 	product = await Product.get(product_id)
 
 	if product is None:
