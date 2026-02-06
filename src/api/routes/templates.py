@@ -2,6 +2,8 @@ import fastapi
 
 from api.dependencies import templates as get_templates
 
+from models import Product, ProductCategory
+
 templates = get_templates()
 
 router = fastapi.APIRouter()
@@ -37,21 +39,18 @@ async def shop(
 	min_price: float | None = None,
 	max_price: float | None = None
 ):
-	from models import Product, ProductCategory
-	from beanie.operators import In
-
 	query = Product.find_all()
-	
+
 	if category:
-		query = query.find(Product.category.name == category)
-		
+		query = query.find(Product.category.name == category)  # pyright: ignore[reportAttributeAccessIssue]
+
 	if min_price is not None:
 		query = query.find(Product.price >= min_price)
 	if max_price is not None:
 		query = query.find(Product.price <= max_price)
-		
+
 	products = await query.to_list()
-	
+
 	categories = await ProductCategory.find_all().to_list()
 
 	return templates.TemplateResponse(request=request, name="shop.html", context={
@@ -71,10 +70,10 @@ async def admin(request: fastapi.Request):
 		{"$group": {"_id": None, "total_orders": {"$sum": 1}, "total_revenue": {"$sum": "$total_price"}}}
 	]
 	stats = await Order.aggregate(pipeline).to_list()
-	
+
 	total_orders = stats[0]["total_orders"] if stats else 0
 	total_revenue = stats[0]["total_revenue"] if stats else 0
-	
+
 	products = await Product.find_all().to_list()
 
 	return templates.TemplateResponse(request=request, name="admin.html", context={

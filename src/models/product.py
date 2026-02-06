@@ -5,7 +5,6 @@ from beanie import DecimalAnnotation, Document, Link
 from pydantic import BaseModel, Field, NonNegativeInt
 
 from .product_category import ProductCategory
-from .review import Review
 
 
 class ProductGender(enum.Enum):
@@ -28,7 +27,8 @@ class Product(Document):
 	brand: str | None = None
 	gender: ProductGender = ProductGender.UNISEX
 	variants: list[ProductVariant] = Field(default_factory=list)
-	reviews: list[Review] = Field(default_factory=list)
+	price: DecimalAnnotation
+	created_at: datetime.datetime = Field(default_factory=lambda: datetime.datetime.now(tz=datetime.UTC))
 
 	class Settings:
 		name = "products"
