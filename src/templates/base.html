@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
 	<link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
 </head>
+
 <body>
 	<nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top py-3 shadow-sm">
 		<div class="container">
@@ -20,25 +22,29 @@
 				<ul class="navbar-nav ms-auto align-items-center">
 					<li class="nav-item"><a class="nav-link" href="/">Home</a></li>
 					<li class="nav-item"><a class="nav-link" href="/shop">Shop</a></li>
+					{% if user is defined and user.role == 'admin' %}
 					<li class="nav-item"><a class="nav-link" href="/admin">Admin</a></li>
+					{% endif %}
 
 					{% if user is defined %}
-						<li class="nav-item ms-3">
-							<span class="text-muted small">Hi, {{ user.first_name }}</span>
-						</li>
-						<li class="nav-item ms-3">
-							<a href="/logout" class="btn btn-sm btn-outline-dark">Logout</a>
-						</li>
+					<li class="nav-item ms-3">
+						<span class="text-muted small">Hi, {{ user.first_name }}</span>
+					</li>
+					<li class="nav-item ms-3">
+						<a href="/logout" class="btn btn-sm btn-outline-dark">Logout</a>
+					</li>
 					{% else %}
-						<li class="nav-item ms-3">
-							<a href="/login" class="nav-link">Login</a>
-						</li>
+					<li class="nav-item ms-3">
+						<a href="/login" class="nav-link">Login</a>
+					</li>
 					{% endif %}
 
 					<li class="nav-item ms-3">
 						<a href="/cart" class="position-relative text-dark">
 							<i class="bi bi-bag" style="font-size: 1.5rem;"></i>
-							<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+							<span
+								class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+								style="font-size: 0.6rem;">
 								2
 							</span>
 						</a>
@@ -49,13 +55,13 @@
 	</nav>
 
 	<div style="margin-top: 80px;"> {% with messages = get_flashed_messages(with_categories=true) %}
-			{% if messages %}
-				<div class="container mt-3">
-					{% for category, message in messages %}
-						<div class="alert alert-{{ category }}">{{ message }}</div>
-					{% endfor %}
-				</div>
-			{% endif %}
+		{% if messages %}
+		<div class="container mt-3">
+			{% for category, message in messages %}
+			<div class="alert alert-{{ category }}">{{ message }}</div>
+			{% endfor %}
+		</div>
+		{% endif %}
 		{% endwith %}
 
 		{% block content %}{% endblock %}
@@ -90,6 +96,7 @@
 	</footer>
 
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ url_for('static', path='js/main.js') }}"></script>
+	<script src="{{ url_for('static', path='js/main.js') }}"></script>
 </body>
+
 </html>

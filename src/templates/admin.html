@@ -13,13 +13,13 @@
         <div class="col-md-4">
             <div class="card border-0 shadow-sm p-3">
                 <h6 class="text-muted text-uppercase small">Total Orders</h6>
-                <h2 class="fw-bold">124</h2>
+                <h2 class="fw-bold">{{ total_orders }}</h2>
             </div>
         </div>
         <div class="col-md-4">
             <div class="card border-0 shadow-sm p-3">
                 <h6 class="text-muted text-uppercase small">Total Revenue</h6>
-                <h2 class="fw-bold text-success">$12,450</h2>
+                <h2 class="fw-bold text-success">${{ total_revenue }}</h2>
             </div>
         </div>
         <div class="col-md-4">
@@ -50,23 +50,28 @@
                     <tr>
                         <td class="ps-4">
                             <div class="d-flex align-items-center">
-                                <img src="{{ product.image_url }}" class="rounded me-3" width="40" height="40" style="object-fit:cover;">
+                                <img src="{{ product.image_url }}" class="rounded me-3" width="40" height="40"
+                                    style="object-fit:cover;">
                                 <strong>{{ product.name }}</strong>
                             </div>
                         </td>
                         <td><span class="badge bg-secondary">{{ product.category }}</span></td>
                         <td>${{ product.price }}</td>
                         <td>
-                            {% if product.stock > 10 %}
-                                <span class="text-success">{{ product.stock }} items</span>
-                            {% else %}
-                                <span class="text-danger">Low: {{ product.stock }}</span>
-                            {% endif %}
+                            <div class="d-flex align-items-center">
+                                <span class="me-2" id="stock-count-{{ product.id }}">{{ product.stock }}</span>
+                                <button class="btn btn-sm btn-outline-success me-1"
+                                    onclick="updateStock('{{ product.id }}', 1)">+</button>
+                                <button class="btn btn-sm btn-outline-danger"
+                                    onclick="updateStock('{{ product.id }}', -1)">-</button>
+                            </div>
                         </td>
                         <td>
                             <button class="btn btn-sm btn-outline-primary me-1"><i class="bi bi-pencil"></i></button>
-                            <form action="/delete_product/{{ product._id }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this item?');">
-                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            <form action="/delete_product/{{ product.id }}" method="POST" class="d-inline"
+                                onsubmit="return confirm('Delete this item?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i
+                                        class="bi bi-trash"></i></button>
                             </form>
                         </td>
                     </tr>
@@ -76,4 +81,27 @@
         </div>
     </div>
 </div>
+
+<script>
+    async function updateStock(productId, change) {
+        try {
+            const response = await fetch(`/api/shop/product/${productId}/stock`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ change: change })
+            });
+            const data = await response.json();
+            if (data.status === 'success') {
+                document.getElementById(`stock-count-${productId}`).innerText = data.new_stock;
+            } else {
+                alert('Error updating stock: ' + data.detail);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to update stock');
+        }
+    }
+</script>
 {% endblock %}

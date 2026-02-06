@@ -31,15 +31,57 @@ async def logout(request: fastapi.Request):
 	})
 
 @router.get("/shop", response_class=fastapi.responses.HTMLResponse)
-async def shop(request: fastapi.Request):
+async def shop(
+	request: fastapi.Request,
+	category: str | None = None,
+	min_price: float | None = None,
+	max_price: float | None = None
+):
+	from models import Product, ProductCategory
+	from beanie.operators import In
+
+	query = Product.find_all()
+	
+	if category:
+		query = query.find(Product.category.name == category)
+		
+	if min_price is not None:
+		query = query.find(Product.price >= min_price)
+	if max_price is not None:
+		query = query.find(Product.price <= max_price)
+		
+	products = await query.to_list()
+	
+	categories = await ProductCategory.find_all().to_list()
+
 	return templates.TemplateResponse(request=request, name="shop.html", context={
-		"get_flashed_messages": lambda *args, **kwargs: []
+		"get_flashed_messages": lambda *args, **kwargs: [],
+		"products": products,
+		"categories": categories,
+		"current_category": category,
+		"min_price": min_price,
+		"max_price": max_price
 	})
 
 @router.get("/admin", response_class=fastapi.responses.HTMLResponse)
 async def admin(request: fastapi.Request):
+	from models import Order, Product
+
+	pipeline = [
+		{"$group": {"_id": None, "total_orders": {"$sum": 1}, "total_revenue": {"$sum": "$total_price"}}}
+	]
+	stats = await Order.aggregate(pipeline).to_list()
+	
+	total_orders = stats[0]["total_orders"] if stats else 0
+	total_revenue = stats[0]["total_revenue"] if stats else 0
+	
+	products = await Product.find_all().to_list()
+
 	return templates.TemplateResponse(request=request, name="admin.html", context={
-		"get_flashed_messages": lambda *args, **kwargs: []
+		"get_flashed_messages": lambda *args, **kwargs: [],
+		"total_orders": total_orders,
+		"total_revenue": total_revenue,
+		"products": products
 	})
 
 @router.get("/cart", response_class=fastapi.responses.HTMLResponse)
