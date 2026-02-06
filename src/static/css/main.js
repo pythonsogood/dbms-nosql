@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. GLOBAL LOGIC (base.html)
     // ==========================================
     
-    // Auto-hide Flash Messages after 4 seconds
     const alerts = document.querySelectorAll('.alert');
     if (alerts.length > 0) {
         setTimeout(() => {
@@ -16,7 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 4000);
     }
 
-    // Highlight active Navbar link
     const currentPath = window.location.pathname;
     const navLinks = document.querySelectorAll('.nav-link');
     navLinks.forEach(link => {
@@ -30,7 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     const priceRange = document.getElementById('priceRange');
     if (priceRange) {
-        // Create a label to show the current price value dynamically
         const rangeLabel = document.createElement('span');
         rangeLabel.className = 'badge bg-dark ms-2';
         rangeLabel.textContent = `$${priceRange.value}`;
@@ -40,11 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
             rangeLabel.textContent = `$${e.target.value}`;
         });
 
-        // Trigger filter on change (optional: send to backend)
         priceRange.addEventListener('change', (e) => {
             console.log(`Filter by max price: ${e.target.value}`);
-            // Logic to reload page with query param:
-            // window.location.href = `/shop?max_price=${e.target.value}`;
         });
     }
 
@@ -84,18 +78,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
                 
-                // UX: Disable input while updating
                 e.target.disabled = true;
 
-                // Here you would typically call your backend API
-                // Example: await updateCartQuantity(productId, newQty);
-                
                 console.log(`Updated quantity to ${newQty}. recalculating total...`);
                 
-                // Simulate reload to update totals (Simplest approach for Flask)
-                // location.reload(); 
-                
-                // Re-enable input
                 e.target.disabled = false;
             });
         });
@@ -111,9 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
                     e.preventDefault();
                 } else {
-                    // Logic to find the product ID usually stored in a data-attribute
-                    // const productId = btn.getAttribute('data-id');
-                    // fetch(`/api/delete/${productId}`, { method: 'DELETE' })...
                     console.log("Item deleted");
                 }
             });
