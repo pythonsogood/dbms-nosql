@@ -4,7 +4,7 @@ import fastapi
 from pydantic import BaseModel
 
 from api.dependencies import auth
-from models.user import User
+from models import User
 
 router = fastapi.APIRouter(prefix="/auth")
 
