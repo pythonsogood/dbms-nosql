@@ -1,6 +1,7 @@
 from typing import Annotated
 
 import fastapi
+import fastapi.security
 import jwt
 
 import config
@@ -8,15 +9,12 @@ from models.user import User
 
 
 class Auth():
+	OAUTH2_SCHEME = fastapi.security.OAuth2PasswordBearer(tokenUrl="/api/auth/token")
+
 	def __init__(self) -> None:
 		pass
 
-	async def __call__(self, authorization: Annotated[str, fastapi.Header()]) -> User:
-		scheme, _, token = authorization.partition(" ")
-
-		if scheme.lower() != "bearer":
-			raise fastapi.HTTPException(status_code=fastapi.status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
-
+	async def __call__(self, token: Annotated[str, fastapi.Depends(OAUTH2_SCHEME)]) -> User:
 		try:
 			payload = jwt.decode(token, config.JWT_SECRET_KEY, algorithms=["HS256"])
 		except jwt.ExpiredSignatureError:

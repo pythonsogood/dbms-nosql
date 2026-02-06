@@ -1,6 +1,7 @@
 from typing import Annotated
 
 import fastapi
+from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 
 from api.dependencies import auth
@@ -22,6 +23,15 @@ async def login(login_request: LoginRequest):
 		raise fastapi.HTTPException(status_code=fastapi.status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
 	return {"status": "success", "data": user.create_jwt_token()}
+
+@router.post("/token", response_class=fastapi.responses.ORJSONResponse)
+async def token(form_data: Annotated[OAuth2PasswordRequestForm, fastapi.Depends()]):
+	user = await User.find_one({"username": form_data.username})
+
+	if user is None or not user.verify_password(form_data.password):
+		raise fastapi.HTTPException(status_code=fastapi.status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+
+	return {"access_token": user.create_jwt_token(), "token_type": "bearer"}
 
 @router.get("/whoami", response_class=fastapi.responses.ORJSONResponse)
 async def whoami(user: Annotated[User, fastapi.Depends(auth)]):
