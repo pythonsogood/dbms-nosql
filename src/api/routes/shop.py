@@ -24,17 +24,18 @@ async def get_product_brands():
 
 @router.get("/products", response_class=fastapi.responses.ORJSONResponse)
 async def get_products(
-	category_filter: Annotated[list[str], fastapi.Query(default_factory=list)] = [],
-	min_price: float | None = None,
-	max_price: float | None = None
+	category_filter: Annotated[list[str], fastapi.Query(default_factory=list)],
+	min_price: Annotated[float | None, fastapi.Query()] = None,
+	max_price: Annotated[float | None, fastapi.Query()] = None
 ):
 	query = Product.find_all()
 
 	if category_filter:
-		query = query.find(In(Product.category.name, category_filter)) 
+		query = query.find(In(Product.category.name, category_filter))
 
 	if min_price is not None:
 		query = query.find(Product.price >= min_price)
+
 	if max_price is not None:
 		query = query.find(Product.price <= max_price)
 
@@ -53,13 +54,13 @@ async def get_product(product_id: Annotated[str, fastapi.Path()]):
 
 @router.post("/product/{product_id}/stock", response_class=fastapi.responses.ORJSONResponse)
 async def update_stock(
-	product_id: str, 
+	product_id: str,
 	change:  Annotated[int, fastapi.Body(embed=True)]
 ):
 	product = await Product.get(PydanticObjectId(product_id))
 	if not product:
 		raise fastapi.HTTPException(status_code=404, detail="Product not found")
-	
+
 	try:
 		await product.update({"$inc": {Product.stock: change}})
 		updated_product = await Product.get(PydanticObjectId(product_id))
@@ -74,7 +75,7 @@ async def add_review(
 ):
 	# Review using $push
 	from models import Review
-	
+
 	product = await Product.get(PydanticObjectId(product_id))
 	if not product:
 		raise fastapi.HTTPException(status_code=404, detail="Product not found")
@@ -86,7 +87,7 @@ async def add_review(
 	)
 
 	await product.update({"$push": {Product.reviews: new_review}})
-	
+
 	return {"status": "success", "message": "Review added"}
 
 @router.post("/cart/remove", response_class=fastapi.responses.ORJSONResponse)
@@ -94,10 +95,10 @@ async def remove_from_cart(
 	product_id: Annotated[str, fastapi.Body(embed=True)],
 	user: Annotated[User, fastapi.Depends(auth)]
 ):
-	
+
 	from beanie import PydanticObjectId
 	pid = PydanticObjectId(product_id)
-	
+
 
 	await user.update({"$pull": {"cart": {"$id": PydanticObjectId(product_id)}}})
 	return {"status": "success", "message": "Item removed"}
