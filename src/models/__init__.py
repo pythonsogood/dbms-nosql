@@ -18,6 +18,6 @@ __all__ = (
 
 from .address import Address
 from .order import Order, OrderItem, OrderStatus
-from .product_category import ProductCategory
 from .product import Product, ProductGender, ProductVariant
+from .product_category import ProductCategory
 from .user import User

@@ -12,7 +12,6 @@ import config
 
 from .product import Product
 
-
 PASSWORD_HASHER = argon2.PasswordHasher(time_cost=2, memory_cost=19 * 1024, parallelism=1)
 
 

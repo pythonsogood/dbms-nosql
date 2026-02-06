@@ -2,7 +2,6 @@ import fastapi
 
 from api.dependencies import templates as get_templates
 
-
 templates = get_templates()
 
 router = fastapi.APIRouter()

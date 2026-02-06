@@ -8,7 +8,7 @@ from beanie import init_beanie
 from fastapi.staticfiles import StaticFiles
 
 import config
-from api import dependencies, api_router, templates_router
+from api import api_router, dependencies, templates_router
 from models import Address, Order, Product, ProductCategory, User
 
 
