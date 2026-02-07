@@ -2,8 +2,10 @@ import datetime
 import enum
 from typing import TYPE_CHECKING
 
+import pymongo
 from beanie import BackLink, DecimalAnnotation, Document, Link
 from pydantic import Field, NonNegativeInt
+from pymongo import IndexModel
 
 from .product_category import ProductCategory
 
@@ -33,3 +35,7 @@ class Product(Document):
 	class Settings:
 		name = "products"
 		use_state_management = True
+		indexes = [
+			IndexModel([("category", pymongo.ASCENDING), ("price", pymongo.ASCENDING)]),
+			IndexModel([("category", pymongo.ASCENDING), ("gender", pymongo.ASCENDING), ("price", pymongo.ASCENDING)]),
+		]
