@@ -27,7 +27,7 @@
 					materials tailored for the modern urban aesthetic.' }}
 				</p>
 
-				<form action="/api/shop/cart/{{ product.id }}" onsubmit="onAddToCartSubmit(this); event.preventDefault(); return false;">
+				<form action="/api/v1/shop/cart/{{ product.id }}" onsubmit="onAddToCartSubmit(this); event.preventDefault(); return false;">
 					<div class="mb-4">
 						<label class="form-label fw-bold text-uppercase small">Select Size</label>
 						<div class="d-flex gap-2">
@@ -93,7 +93,7 @@
 			<div class="card border-0 bg-light p-4">
 				<h4 class="mb-3">Leave a Review</h4>
 				{% if request.user is not none %}
-					<form id="reviewForm" method="POST" action="/api/shop/product/{{ product.id }}/review" onsubmit="onReviewSubmit(this); event.preventDefault(); return false;">
+					<form id="reviewForm" method="POST" action="/api/v1/shop/product/{{ product.id }}/review" onsubmit="onReviewSubmit(this); event.preventDefault(); return false;">
 						<div class="mb-3">
 							<label class="form-label">Rating</label>
 							<select class="form-select" id="reviewRating" required>

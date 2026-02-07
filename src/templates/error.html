@@ -1,0 +1,32 @@
+<!-- Error Template: https://codepen.io/gabriellewee/pen/oBPGWd -->
+
+<!DOCTYPE html>
+<html lang="en"><head>
+	<meta charset="UTF-8">
+	<title>.red | Something went wrong</title>
+	<link rel="stylesheet" href="https://public.codepenassets.com/css/reset-2.0.min.css">
+	<link rel="stylesheet" href="https://gabriellew.ee/static/css/fonts.css">
+	<link rel="stylesheet" href="{{ url_for('static', path='css/pages/error.css') }}">
+</head>
+<body>
+	<main>
+		<div>
+			<div>
+				<span>{{ status_code }} error</span>
+				<span>{{ detail }}</span>
+			</div>
+			<svg viewBox="0 0 200 600"><polygon points="118.302698 8 59.5369448 66.7657528 186.487016 193.715824 14 366.202839 153.491505 505.694344 68.1413353 591.044514 200 591.044514 200 8"></polygon></svg>
+		</div>
+		<svg class="crack" viewBox="0 0 200 600"><polyline points="118.302698 8 59.5369448 66.7657528 186.487016 193.715824 14 366.202839 153.491505 505.694344 68.1413353 591.044514"></polyline></svg>
+		<div>
+			<svg viewBox="0 0 200 600"><polygon points="118.302698 8 59.5369448 66.7657528 186.487016 193.715824 14 366.202839 153.491505 505.694344 68.1413353 591.044514 0 591.044514 0 8"></polygon></svg>
+			<div>
+				<span>sorry about that!</span>
+				<span>
+					<a href="/"><b>return home?</b></a>
+				</span>
+			</div>
+		</div>
+	</main>
+</body>
+</html>

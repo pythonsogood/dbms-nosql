@@ -4,7 +4,7 @@
 <div class="container">
     <div class="auth-container shadow-lg">
         <h3 class="fw-bold text-center mb-4">Welcome Back</h3>
-        <form method="POST" action="/api/auth/register" onsubmit="onRegisterSubmit(this); event.preventDefault(); return false;">
+        <form method="POST" action="/api/v1/auth/register" onsubmit="onRegisterSubmit(this); event.preventDefault(); return false;">
             <div class="mb-3">
                 <label class="form-label small text-muted">Username</label>
                 <input type="text" name="username" class="form-control p-3" placeholder="user" required>

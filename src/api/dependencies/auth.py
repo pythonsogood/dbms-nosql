@@ -7,7 +7,7 @@ from models.user import User
 
 
 class Auth():
-	OAUTH2_SCHEME = fastapi.security.OAuth2PasswordBearer(tokenUrl="/api/auth/token")
+	OAUTH2_SCHEME = fastapi.security.OAuth2PasswordBearer(tokenUrl="/api/v1/auth/token")
 
 	def __init__(self) -> None:
 		pass

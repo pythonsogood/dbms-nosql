@@ -7,7 +7,7 @@ from beanie.operators import In
 from pydantic import BaseModel, NonNegativeInt
 
 from api.dependencies import auth
-from models import Address, Product, ProductCategory, Review, User, UserCart
+from models import Address, Order, Product, ProductCategory, Review, User, UserCart
 
 router = fastapi.APIRouter(prefix="/shop")
 
@@ -100,14 +100,24 @@ async def add_to_cart(user: Annotated[User, fastapi.Depends(auth)], product_id: 
 	if product is None:
 		raise fastapi.HTTPException(status_code=404, detail="Product not found")
 
-	for i, item in enumerate(user.cart):
-		if item.product_id == product.id and item.size == size:
-			user.cart[i].quantity += quantity
-			break
-	else:
-		user.cart.append(UserCart(product_id=product.id, size=size, quantity=quantity))
+	update_result = await user.get_pymongo_collection().update_one({
+		"_id": user.id,
+		"cart.product_id": product.id,
+		"cart.size": size,
+	}, {
+		"$inc": {"cart.$.quantity": quantity}
+	})
 
-	await user.save()
+	if update_result.matched_count == 0:
+		await user.update({
+			"$push": {
+				"cart": UserCart(
+					product_id=product.id,
+					size=size,
+					quantity=quantity,
+				).model_dump()
+			},
+		})
 
 	return {"status": "success", "message": "Product added to cart"}
 
@@ -118,17 +128,34 @@ async def add_to_cart_patch(user: Annotated[User, fastapi.Depends(auth)], produc
 	if product is None:
 		raise fastapi.HTTPException(status_code=404, detail="Product not found")
 
-	for i, item in enumerate(user.cart):
-		if item.product_id == product.id and item.size == size:
-			if quantity > 0:
-				user.cart[i].quantity = quantity
-			else:
-				user.cart.pop(i)
-			break
-	else:
-		user.cart.append(UserCart(product_id=product.id, size=size, quantity=quantity))
+	if quantity > 0:
+		update_result = await user.get_pymongo_collection().update_one({
+			"_id": user.id,
+			"cart.product_id": product.id,
+			"cart.size": size,
+		}, {
+			"$set": {"cart.$.quantity": quantity}
+		})
 
-	await user.save()
+		if update_result.matched_count == 0:
+			await user.update({
+				"$push": {
+					"cart": UserCart(
+						product_id=product.id,
+						size=size,
+						quantity=quantity,
+					).model_dump(),
+				},
+			})
+	else:
+		await user.update({
+			"$pull": {
+				"cart": {
+					"product_id": product.id,
+					"size": size,
+				},
+			},
+		})
 
 	return {"status": "success", "message": "Product quantity changed in cart"}
 
@@ -139,15 +166,19 @@ async def remove_from_cart(user: Annotated[User, fastapi.Depends(auth)], product
 	if product is None:
 		raise fastapi.HTTPException(status_code=404, detail="Product not found")
 
-	for i, item in enumerate(user.cart):
-		if item.product_id == product.id and item.size == size:
-			user.cart.pop(i)
+	update_result = await user.get_pymongo_collection().update_one({
+		"_id": user.id,
+	}, {
+		"$pull": {
+			"cart": {
+				"product_id": product.id,
+				"size": size,
+			},
+		},
+	})
 
-			break
-	else:
+	if update_result.modified_count == 0:
 		raise fastapi.HTTPException(status_code=404, detail="Product not found in cart")
-
-	await user.save()
 
 	return {"status": "success", "message": "Product removed from removed"}
 
@@ -175,3 +206,37 @@ async def remove_addresses(user: Annotated[User, fastapi.Depends(auth)], address
 	await address.delete()
 
 	return {"status": "success", "message": "Address removed"}
+
+@router.delete("/admin_stats", response_class=fastapi.responses.ORJSONResponse)
+async def admin_stats(user: Annotated[User, fastapi.Depends(auth)]):
+	if user.role != "admin":
+		raise fastapi.HTTPException(status_code=fastapi.status.HTTP_403_FORBIDDEN, detail="Forbidden")
+
+	order_stats = await Order.aggregate([
+		{"$group": {
+			"_id": None,
+			"total_orders": {"$sum": 1},
+			"total_revenue": {"$sum": "$total_price"},
+		}},
+	]).to_list()
+
+	total_orders = order_stats[0]["total_orders"] if order_stats else 0
+	total_revenue = order_stats[0]["total_revenue"] if order_stats else 0
+
+	product_stats = await Product.aggregate([
+		{"$group": {
+			"_id": None,
+			"total_stock": {"$sum": "$stock"},
+		}},
+	]).to_list()
+
+	total_stock = product_stats[0]["total_stock"] if product_stats else 0
+
+	products = await Product.find_many(fetch_links=True).to_list()
+
+	return {
+		"total_orders": total_orders,
+		"total_revenue": total_revenue,
+		"total_stock": total_stock,
+		"products": products
+	}

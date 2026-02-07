@@ -67,7 +67,7 @@
 								</div>
 							</td>
 							<td>
-								<form action="/api/shop/product/{{ product.id }}" class="d-inline" onsubmit="if (confirm('Are you sure you want to delete this product? This action cannot be undone.')) {deleteProduct(this)}; event.preventDefault(); return false;">
+								<form action="/api/v1/shop/product/{{ product.id }}" class="d-inline" onsubmit="if (confirm('Are you sure you want to delete this product? This action cannot be undone.')) {deleteProduct(this)}; event.preventDefault(); return false;">
 									<button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
 								</form>
 							</td>

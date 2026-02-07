@@ -36,13 +36,14 @@ async def shop(
 	min_price: float | None = None,
 	max_price: float | None = None
 ):
-	query = Product.find_all()
+	query = Product.find_many(fetch_links=True)
 
 	if category:
 		query = query.find(Product.category.name == category)  # pyright: ignore[reportAttributeAccessIssue]
 
 	if min_price is not None:
 		query = query.find(Product.price >= min_price)
+
 	if max_price is not None:
 		query = query.find(Product.price <= max_price)
 
@@ -60,11 +61,14 @@ async def shop(
 
 @router.get("/admin")
 async def admin(request: fastapi.Request):
+	if request.user is None or request.user.role != "admin":
+		raise fastapi.HTTPException(status_code=fastapi.status.HTTP_403_FORBIDDEN, detail="Forbidden")
+
 	order_stats = await Order.aggregate([
 		{"$group": {
 			"_id": None,
 			"total_orders": {"$sum": 1},
-			"total_revenue": {"$sum": "$total_price"}
+			"total_revenue": {"$sum": "$total_price"},
 		}},
 	]).to_list()
 
