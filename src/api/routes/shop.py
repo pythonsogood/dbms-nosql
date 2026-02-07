@@ -4,10 +4,10 @@ import fastapi
 from annotated_types import Interval
 from beanie import PydanticObjectId
 from beanie.operators import In
-from pydantic import BaseModel
+from pydantic import BaseModel, NonNegativeInt
 
 from api.dependencies import auth
-from models import Product, ProductCategory, User, Review
+from models import Address, Product, ProductCategory, Review, User, UserCart
 
 router = fastapi.APIRouter(prefix="/shop")
 
@@ -15,6 +15,13 @@ router = fastapi.APIRouter(prefix="/shop")
 class PostReviewRequest(BaseModel):
 	rating: Annotated[int, Interval(ge=1, le=5)]
 	comment: str
+
+
+class AddAddressRequest(BaseModel):
+	country: str
+	city: str
+	address: str
+	zip_code: str
 
 
 @router.get("/product_categories", response_class=fastapi.responses.ORJSONResponse)
@@ -55,7 +62,7 @@ async def get_products(
 
 @router.get("/product/{product_id}", response_class=fastapi.responses.ORJSONResponse)
 async def get_product(product_id: Annotated[str, fastapi.Path()]):
-	product = await Product.get(PydanticObjectId(product_id))
+	product = await Product.get(PydanticObjectId(product_id), fetch_links=True)
 
 	if product is None:
 		raise fastapi.HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND, detail="Product not found")
@@ -89,28 +96,84 @@ async def edit_review(user: Annotated[User, fastapi.Depends(auth)], product_id: 
 	return {"status": "success", "message": "Review added"}
 
 @router.put("/cart/{product_id}", response_class=fastapi.responses.ORJSONResponse)
-async def add_to_cart(user: Annotated[User, fastapi.Depends(auth)], product_id: Annotated[str, fastapi.Path(embed=True)]):
+async def add_to_cart(user: Annotated[User, fastapi.Depends(auth)], product_id: Annotated[str, fastapi.Path(embed=True)], size: Annotated[str, fastapi.Query()], quantity: Annotated[NonNegativeInt, fastapi.Query()] = 1):
 	product = await Product.get(product_id)
 
 	if product is None:
 		raise fastapi.HTTPException(status_code=404, detail="Product not found")
 
-	user.cart.append(product)
+	for i, item in enumerate(user.cart):
+		if item.product_id == product.id and item.size == size:
+			user.cart[i].quantity += quantity
+			break
+	else:
+		user.cart.append(UserCart(product_id=product.id, size=size, quantity=quantity))
 
 	await user.save()
 
 	return {"status": "success", "message": "Product added to cart"}
 
-@router.delete("/cart/{product_id}", response_class=fastapi.responses.ORJSONResponse)
-async def remove_from_cart(user: Annotated[User, fastapi.Depends(auth)], product_id: Annotated[str, fastapi.Path(embed=True)]):
+@router.patch("/cart/{product_id}", response_class=fastapi.responses.ORJSONResponse)
+async def add_to_cart_patch(user: Annotated[User, fastapi.Depends(auth)], product_id: Annotated[str, fastapi.Path(embed=True)], size: Annotated[str, fastapi.Query()], quantity: Annotated[int, fastapi.Query()] = 1):
 	product = await Product.get(product_id)
 
 	if product is None:
 		raise fastapi.HTTPException(status_code=404, detail="Product not found")
 
-	if product not in user.cart:
+	for i, item in enumerate(user.cart):
+		if item.product_id == product.id and item.size == size:
+			if quantity > 0:
+				user.cart[i].quantity = quantity
+			else:
+				user.cart.pop(i)
+			break
+	else:
+		user.cart.append(UserCart(product_id=product.id, size=size, quantity=quantity))
+
+	await user.save()
+
+	return {"status": "success", "message": "Product quantity changed in cart"}
+
+@router.delete("/cart/{product_id}", response_class=fastapi.responses.ORJSONResponse)
+async def remove_from_cart(user: Annotated[User, fastapi.Depends(auth)], product_id: Annotated[str, fastapi.Path(embed=True)], size: Annotated[str, fastapi.Query()]):
+	product = await Product.get(product_id)
+
+	if product is None:
+		raise fastapi.HTTPException(status_code=404, detail="Product not found")
+
+	for i, item in enumerate(user.cart):
+		if item.product_id == product.id and item.size == size:
+			user.cart.pop(i)
+
+			break
+	else:
 		raise fastapi.HTTPException(status_code=404, detail="Product not found in cart")
 
-	user.cart.remove(product)
+	await user.save()
 
 	return {"status": "success", "message": "Product removed from removed"}
+
+@router.get("/addresses", response_class=fastapi.responses.ORJSONResponse)
+async def get_addresses(user: Annotated[User, fastapi.Depends(auth)]):
+	addresses = await Address.find_all().to_list()
+
+	return {"status": "success", "data": addresses}
+
+@router.put("/address", response_class=fastapi.responses.ORJSONResponse)
+async def add_address(user: Annotated[User, fastapi.Depends(auth)], address: AddAddressRequest):
+	new_address = Address(user=user, country=address.country, city=address.city, address=address.address, zip_code=address.zip_code)
+
+	await new_address.save()
+
+	return {"status": "success", "message": "Address added"}
+
+@router.delete("/address/{address_id}", response_class=fastapi.responses.ORJSONResponse)
+async def remove_addresses(user: Annotated[User, fastapi.Depends(auth)], address_id: Annotated[str, fastapi.Path(embed=True)]):
+	address = await Address.get(address_id)
+
+	if address is None:
+		raise fastapi.HTTPException(status_code=404, detail="Address not found")
+
+	await address.delete()
+
+	return {"status": "success", "message": "Address removed"}

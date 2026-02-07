@@ -1,15 +1,20 @@
 from collections.abc import Awaitable, Callable
-from typing import Annotated
 
 import fastapi
 
 from api.dependencies import auth
-from models import User
 
 
 class AuthMiddleware:
-	async def __call__(self, request: fastapi.Request, user: Annotated[User, fastapi.Depends(auth)], call_next: Callable[[fastapi.Request], Awaitable[fastapi.Response]]) -> fastapi.Response:
+	async def __call__(self, request: fastapi.Request, call_next: Callable[[fastapi.Request], Awaitable[fastapi.Response]]) -> fastapi.Response:
+		user = await auth.get_current_user(request)
+
 		request.scope["user"] = user
+
+		if user is not None:
+			request.scope["user_cart"] = await user.fetch_cart()
+		else:
+			request.scope["user_cart"] = []
 
 		response = await call_next(request)
 

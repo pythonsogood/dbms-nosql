@@ -1,5 +1,5 @@
 :root {
-    --primary-red: #800020; 
+    --primary-red: #800020;
     --primary-hover: #5a0016;
     --bg-grey: #f8f9fa;
     --text-dark: #212529;
@@ -30,7 +30,7 @@ body {
 
 /* Hero Section */
 .hero-section {
-    background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('images/hero_section.jpg');
+    background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('../images/hero_section.jpg');
     background-size: cover;
     background-position: center;
     height: 85vh;
@@ -77,7 +77,7 @@ body {
 .product-img-wrapper {
     overflow: hidden;
     position: relative;
-    height: 400px; 
+    height: 400px;
     background-color: #f0f0f0;
 }
 

@@ -12,14 +12,17 @@ __all__ = (
 	"ProductCategory",
 	"Product",
 	"ProductGender",
-	"ProductVariant",
 	"User",
+	"UserCart",
+	"UserCartFetched",
 	"Review",
 )
 
 from .address import Address
 from .order import Order, OrderItem, OrderStatus
-from .product import Product, ProductGender, ProductVariant
+from .product import Product, ProductGender
 from .product_category import ProductCategory
-from .user import User
 from .review import Review
+from .user import User, UserCart, UserCartFetched
+
+Product.model_rebuild()

@@ -6,49 +6,48 @@
 
     <div class="row g-5">
         <div class="col-lg-8">
-            {% if cart_items %}
-            <div class="table-responsive">
-                <table class="table align-middle">
-                    <thead class="text-uppercase small text-muted border-0">
-                        <tr>
-                            <th scope="col" style="width: 50%;">Product</th>
-                            <th scope="col">Price</th>
-                            <th scope="col">Quantity</th>
-                            <th scope="col" class="text-end">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody class="border-top-0">
-                        {% for item in cart_items %}
-                        <tr>
-                            <td class="py-4">
-                                <div class="d-flex align-items-center">
-                                    <img src="{{ item.image_url }}" alt="{{ item.name }}" class="rounded me-3"
-                                        width="80" height="100" style="object-fit: cover;">
-                                    <div>
-                                        <h6 class="mb-1 fw-bold">{{ item.name }}</h6>
-                                        <small class="text-muted">Size: {{ item.size }}</small><br>
-                                        <button
-                                            class="btn btn-link text-danger small text-decoration-underline p-0 border-0"
-                                            onclick="removeFromCart('{{ item.product_id }}')">Remove</button>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>${{ item.price }}</td>
-                            <td>
-                                <input type="number" class="form-control form-control-sm w-50 text-center"
-                                    value="{{ item.quantity }}" min="1">
-                            </td>
-                            <td class="text-end fw-bold">${{ item.price * item.quantity }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+            {% if request.user_cart|length > 0 %}
+				<div class="table-responsive">
+					<table class="table align-middle">
+						<thead class="text-uppercase small text-muted border-0">
+							<tr>
+								<th scope="col" style="width: 50%;">Product</th>
+								<th scope="col">Price</th>
+								<th scope="col">Quantity</th>
+								<th scope="col" class="text-end">Total</th>
+							</tr>
+						</thead>
+						<tbody class="border-top-0">
+							{% for item in request.user_cart %}
+								<tr>
+									<td class="py-4">
+										<div class="d-flex align-items-center">
+											<img src="{{ item.product.image_url }}" alt="{{ item.name }}" class="rounded me-3"
+												width="80" height="100" style="object-fit: cover;">
+											<div>
+												<h6 class="mb-1 fw-bold">{{ item.product.name }}</h6>
+												<small class="text-muted">Size: {{ item.size }}</small><br>
+												<button
+													class="btn btn-link text-danger small text-decoration-underline p-0 border-0"
+													onclick="removeFromCart('{{ item.product.id }}', '{{ item.size }}')">Remove</button>
+											</div>
+										</div>
+									</td>
+									<td>${{ item.product.price }}</td>
+									<td>
+										<input type="number" class="form-control form-control-sm w-50 text-center" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" onchange="cartItemQuantityChange('{{ item.product.id }}', '{{ item.size }}', this.value)">
+									</td>
+									<td class="text-end fw-bold">${{ item.product.price * item.quantity }}</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
             {% else %}
-            <div class="text-center py-5 bg-light rounded">
-                <h4 class="text-muted">Your bag is empty.</h4>
-                <a href="/shop" class="btn btn-outline-dark mt-3">Continue Shopping</a>
-            </div>
+				<div class="text-center py-5 bg-light rounded">
+					<h4 class="text-muted">Your bag is empty.</h4>
+					<a href="/shop" class="btn btn-outline-dark mt-3">Continue Shopping</a>
+				</div>
             {% endif %}
         </div>
 
@@ -74,28 +73,4 @@
     </div>
 </div>
 </div>
-
-<script>
-    async function removeFromCart(productId) {
-        if (!confirm('Remove this item from your cart?')) return;
-
-        try {
-            const response = await fetch('/api/shop/cart/remove', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ product_id: productId })
-            });
-            const data = await response.json();
-
-            if (data.status === 'success') {
-                location.reload();
-            } else {
-                alert('Error removing item: ' + data.detail);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Failed to remove item');
-        }
-    }
-</script>
 {% endblock %}

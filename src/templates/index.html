@@ -37,12 +37,12 @@
         <h3 class="fw-bold">Latest Drops</h3>
         <a href="/shop" class="text-muted text-decoration-none">View All</a>
     </div>
-    
+
     <div class="row row-cols-1 row-cols-md-4 g-4">
         {% for product in featured_products %}
         <div class="col">
             <div class="card product-card h-100">
-                <a href="/product/{{ product._id }}" class="product-img-wrapper">
+                <a href="/product/{{ product.id }}" class="product-img-wrapper">
                     <img src="{{ product.image_url }}" alt="{{ product.name }}">
                 </a>
                 <div class="card-body text-center">

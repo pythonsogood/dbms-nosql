@@ -2,148 +2,119 @@
 
 {% block content %}
 <div class="container py-5">
-    <div class="row g-5">
-        <div class="col-md-6">
-            <div class="bg-light rounded overflow-hidden shadow-sm">
-                <img src="{{ product.image_url or 'https://via.placeholder.com/600x800?text=No+Image' }}"
-                    alt="{{ product.name }}" class="img-fluid w-100" style="object-fit: cover; min-height: 500px;">
-            </div>
-        </div>
+	<div class="row g-5">
+		<div class="col-md-6">
+			<div class="bg-light rounded overflow-hidden shadow-sm">
+				<img src="{{ product.image_url }}" alt="{{ product.name }}" class="img-fluid w-100" style="object-fit: cover; height: 800px;">
+			</div>
+		</div>
 
-        <div class="col-md-6">
-            <div class="sticky-top" style="top: 100px; z-index: 1;">
-                <nav aria-label="breadcrumb" class="mb-3">
-                    <ol class="breadcrumb bg-transparent p-0">
-                        <li class="breadcrumb-item"><a href="/shop" class="text-muted text-decoration-none">Shop</a>
-                        </li>
-                        <li class="breadcrumb-item active" aria-current="page">{{ product.category }}</li>
-                    </ol>
-                </nav>
+		<div class="col-md-6">
+			<div class="sticky-top" style="top: 100px; z-index: 1;">
+				<nav aria-label="breadcrumb" class="mb-3">
+					<ol class="breadcrumb bg-transparent p-0">
+						<li class="breadcrumb-item"><a href="/shop" class="text-muted text-decoration-none">Shop</a>
+						</li>
+						<li class="breadcrumb-item active" aria-current="page">{{ product.category.name }}</li>
+					</ol>
+				</nav>
 
-                <h1 class="fw-bold display-5 mb-2">{{ product.name }}</h1>
-                <p class="fs-4 fw-bold text-danger mb-4">${{ product.price }}</p>
+				<h1 class="fw-bold display-5 mb-2">{{ product.name }}</h1>
+				<p class="fs-4 fw-bold text-danger mb-4">${{ product.price }}</p>
 
-                <p class="text-muted mb-4 leading-relaxed">
-                    {{ product.description or 'Premium streetwear designed for comfort and style. Made from high-quality
-                    materials tailored for the modern urban aesthetic.' }}
-                </p>
+				<p class="text-muted mb-4 leading-relaxed">
+					{{ product.description or 'Premium streetwear designed for comfort and style. Made from high-quality
+					materials tailored for the modern urban aesthetic.' }}
+				</p>
 
-                <form action="/add_to_cart/{{ product._id }}" method="POST">
-                    <div class="mb-4">
-                        <label class="form-label fw-bold text-uppercase small">Select Size</label>
-                        <div class="d-flex gap-2">
-                            {% for size in ['S', 'M', 'L', 'XL'] %}
-                            <input type="radio" class="btn-check" name="size" id="size-{{ size }}" value="{{ size }}"
-                                required>
-                            <label class="btn btn-outline-dark px-4 rounded-0" for="size-{{ size }}">{{ size }}</label>
-                            {% endfor %}
-                        </div>
-                    </div>
+				<form action="/api/shop/cart/{{ product.id }}" onsubmit="onAddToCartSubmit(this); event.preventDefault(); return false;">
+					<div class="mb-4">
+						<label class="form-label fw-bold text-uppercase small">Select Size</label>
+						<div class="d-flex gap-2">
+							{% for size in product.sizes %}
+								<input type="radio" class="btn-check" name="size" id="size-{{ size }}" value="{{ size }}" required>
+								<label class="btn btn-outline-dark px-4 rounded-0" for="size-{{ size }}">{{ size }}</label>
+							{% endfor %}
+						</div>
+					</div>
 
-                    <div class="row g-2">
-                        <div class="col-3">
-                            <input type="number" name="quantity"
-                                class="form-control form-control-lg text-center border-dark" value="1" min="1"
-                                max="{{ product.stock }}">
-                        </div>
-                        <div class="col-9">
-                            <button type="submit" class="btn btn-red w-100 btn-lg rounded-0">
-                                Add to Cart
-                            </button>
-                        </div>
-                    </div>
-                </form>
+					<div class="row g-2">
+						<div class="col-3">
+							<input type="number" name="quantity"
+								class="form-control form-control-lg text-center border-dark" value="1" min="1"
+								max="{{ product.stock }}">
+						</div>
+						<div class="col-9">
+							<button type="submit" class="btn btn-red w-100 btn-lg rounded-0">
+								Add to Cart
+							</button>
+						</div>
+					</div>
+				</form>
 
-                <div class="mt-5 border-top pt-4">
-                    <div class="d-flex align-items-center mb-2">
-                        <i class="bi bi-truck me-2"></i> <span>Free shipping on orders over $150</span>
-                    </div>
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-arrow-return-left me-2"></i> <span>30-day return policy</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+				<div class="mt-5 border-top pt-4">
+					<div class="d-flex align-items-center mb-2">
+						<i class="bi bi-truck me-2"></i> <span>Free shipping on orders over $150</span>
+					</div>
+					<div class="d-flex align-items-center">
+						<i class="bi bi-arrow-return-left me-2"></i> <span>30-day return policy</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 
-    <!-- Reviews Section -->
-    <div class="row mt-5">
-        <div class="col-12">
-            <h3 class="fw-bold mb-4">Customer Reviews</h3>
+	<!-- Reviews Section -->
+	<div class="row mt-5">
+		<div class="col-12">
+			<h3 class="fw-bold mb-4">Customer Reviews</h3>
 
-            {% if product.reviews %}
-            <div class="mb-5">
-                {% for review in product.reviews %}
-                <div class="card border-0 shadow-sm mb-3">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <h5 class="card-title fw-bold">{{ review.username }}</h5>
-                            <span class="text-warning">
-                                {% for i in range(review.rating) %}★{% endfor %}
-                                {% for i in range(5 - review.rating) %}☆{% endfor %}
-                            </span>
-                        </div>
-                        <h6 class="card-subtitle mb-2 text-muted">{{ review.created_at.strftime('%Y-%m-%d') }}</h6>
-                        <p class="card-text">{{ review.comment }}</p>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            {% else %}
-            <p class="text-muted mb-5">No reviews yet. Be the first to review!</p>
-            {% endif %}
+			{% if product.reviews %}
+				<div class="mb-5">
+					{% for review in product.reviews %}
+						<div class="card border-0 shadow-sm mb-3">
+							<div class="card-body">
+								<div class="d-flex justify-content-between">
+									<h5 class="card-title fw-bold">{{ review.user.username }}</h5>
+									<span class="text-warning">
+										{% for i in range(review.rating) %}★{% endfor %}{% for i in range(5 - review.rating) %}☆{% endfor %}
+									</span>
+								</div>
+								<h6 class="card-subtitle mb-2 text-muted">{{ review.created_at.strftime('%Y-%m-%d') }}</h6>
+								<p class="card-text">{{ review.comment }}</p>
+							</div>
+						</div>
+					{% endfor %}
+				</div>
+			{% else %}
+				<p class="text-muted mb-5">No reviews yet. Be the first to review!</p>
+			{% endif %}
 
-            <div class="card border-0 bg-light p-4">
-                <h4 class="mb-3">Leave a Review</h4>
-                <form id="reviewForm" onsubmit="submitReview(event)">
-                    <div class="mb-3">
-                        <label class="form-label">Name</label>
-                        <input type="text" class="form-control" id="reviewName" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Rating</label>
-                        <select class="form-select" id="reviewRating" required>
-                            <option value="5">5 - Excellent</option>
-                            <option value="4">4 - Very Good</option>
-                            <option value="3">3 - Good</option>
-                            <option value="2">2 - Fair</option>
-                            <option value="1">1 - Poor</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Comment</label>
-                        <textarea class="form-control" id="reviewComment" rows="3" required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-dark">Submit Review</button>
-                </form>
-            </div>
-        </div>
-    </div>
+			<div class="card border-0 bg-light p-4">
+				<h4 class="mb-3">Leave a Review</h4>
+				{% if request.user is not none %}
+					<form id="reviewForm" method="POST" action="/api/shop/product/{{ product.id }}/review" onsubmit="onReviewSubmit(this); event.preventDefault(); return false;">
+						<div class="mb-3">
+							<label class="form-label">Rating</label>
+							<select class="form-select" id="reviewRating" required>
+								<option value="5">5 - Excellent</option>
+								<option value="4">4 - Very Good</option>
+								<option value="3">3 - Good</option>
+								<option value="2">2 - Fair</option>
+								<option value="1">1 - Poor</option>
+							</select>
+						</div>
+						<div class="mb-3">
+							<label class="form-label">Comment</label>
+							<textarea class="form-control" id="reviewComment" rows="3" required></textarea>
+						</div>
+						<button type="submit" class="btn btn-dark">Submit Review</button>
+					</form>
+				{% else %}
+					<a href="/login" class="btn btn-dark">Login to leave a review</a>
+				{% endif %}
+			</div>
+		</div>
+	</div>
 </div>
-
-<script>
-    async function submitReview(event) {
-        event.preventDefault();
-        const username = document.getElementById('reviewName').value;
-        const rating = parseInt(document.getElementById('reviewRating').value);
-        const comment = document.getElementById('reviewComment').value;
-
-        try {
-            const response = await fetch('/api/shop/product/{{ product.id }}/review', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, rating, comment })
-            });
-            const data = await response.json();
-
-            if (data.status === 'success') {
-                location.reload(); // Reload to show new review
-            } else {
-                alert('Error adding review: ' + data.detail);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Failed to submit review');
-        }
-    }
-</script>
+{% endblock %}

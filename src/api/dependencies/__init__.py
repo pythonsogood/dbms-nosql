@@ -4,7 +4,7 @@ import sys
 sys.path.append(os.path.abspath("../.."))
 
 
-__all__ = ("Database", "database", "Auth", "auth")
+__all__ = ("Database", "database", "Auth", "auth", "Templates", "templates")
 
 
 from .auth import Auth, auth

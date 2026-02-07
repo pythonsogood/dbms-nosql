@@ -1,38 +1,41 @@
+from typing import Annotated
+
 import fastapi
+from beanie import PydanticObjectId
 
 from api.dependencies import templates as get_templates
-
-from models import Product, ProductCategory
+from models import Order, Product, ProductCategory
 
 templates = get_templates()
 
 router = fastapi.APIRouter()
 
-@router.get("/", response_class=fastapi.responses.HTMLResponse)
+@router.get("/")
 async def index(request: fastapi.Request):
 	return templates.TemplateResponse(request=request, name="index.html", context={
 		"get_flashed_messages": lambda *args, **kwargs: []
 	})
 
-@router.get("/login", response_class=fastapi.responses.HTMLResponse)
+@router.get("/login")
 async def login(request: fastapi.Request):
 	return templates.TemplateResponse(request=request, name="login.html", context={
 		"get_flashed_messages": lambda *args, **kwargs: []
 	})
 
-@router.get("/register", response_class=fastapi.responses.HTMLResponse)
+@router.get("/register")
 async def register(request: fastapi.Request):
 	return templates.TemplateResponse(request=request, name="register.html", context={
 		"get_flashed_messages": lambda *args, **kwargs: []
 	})
 
-@router.get("/logout", response_class=fastapi.responses.HTMLResponse)
+@router.get("/logout")
 async def logout(request: fastapi.Request):
-	return templates.TemplateResponse(request=request, name="logout.html", context={
-		"get_flashed_messages": lambda *args, **kwargs: []
-	})
+	response = fastapi.responses.RedirectResponse(url="/")
+	response.delete_cookie("Authorization-Token")
 
-@router.get("/shop", response_class=fastapi.responses.HTMLResponse)
+	return response
+
+@router.get("/shop")
 async def shop(
 	request: fastapi.Request,
 	category: str | None = None,
@@ -62,10 +65,8 @@ async def shop(
 		"max_price": max_price
 	})
 
-@router.get("/admin", response_class=fastapi.responses.HTMLResponse)
+@router.get("/admin")
 async def admin(request: fastapi.Request):
-	from models import Order, Product
-
 	pipeline = [
 		{"$group": {"_id": None, "total_orders": {"$sum": 1}, "total_revenue": {"$sum": "$total_price"}}}
 	]
@@ -83,18 +84,23 @@ async def admin(request: fastapi.Request):
 		"products": products
 	})
 
-@router.get("/cart", response_class=fastapi.responses.HTMLResponse)
+@router.get("/cart")
 async def cart(request: fastapi.Request):
+	if request.user is None:
+		return fastapi.responses.RedirectResponse(url="/login")
+
 	return templates.TemplateResponse(request=request, name="cart.html", context={
 		"get_flashed_messages": lambda *args, **kwargs: []
 	})
 
-@router.get("/remove_from_cart", response_class=fastapi.responses.PlainTextResponse)
-async def remove_from_cart(request: fastapi.Request):
-	return "Not implemented yet"
+@router.get("/product/{product_id}")
+async def product(request: fastapi.Request, product_id: Annotated[str, fastapi.Path()]):
+	product = await Product.get(PydanticObjectId(product_id), fetch_links=True)
 
-@router.get("/product", response_class=fastapi.responses.HTMLResponse)
-async def product(request: fastapi.Request):
+	if product is None:
+		raise fastapi.HTTPException(status_code=404, detail="Product not found")
+
 	return templates.TemplateResponse(request=request, name="product.html", context={
-		"get_flashed_messages": lambda *args, **kwargs: []
+		"get_flashed_messages": lambda *args, **kwargs: [],
+		"product": product,
 	})

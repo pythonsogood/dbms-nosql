@@ -4,15 +4,26 @@ import logging
 import argon2
 import jwt
 import pymongo
-from beanie import Document, Link
-from pydantic import EmailStr, Field
+from beanie import Document, PydanticObjectId
+from pydantic import BaseModel, EmailStr, Field
 from pymongo import IndexModel
 
 import config
-
-from .product import Product
+from models.product import Product
 
 PASSWORD_HASHER = argon2.PasswordHasher(time_cost=2, memory_cost=19 * 1024, parallelism=1)
+
+
+class UserCart(BaseModel):
+	product_id: PydanticObjectId
+	size: str
+	quantity: int
+
+
+class UserCartFetched(BaseModel):
+	product: Product
+	size: str
+	quantity: int
 
 
 class User(Document):
@@ -23,7 +34,7 @@ class User(Document):
 	role: str = "customer"
 	password_hash: str
 	phone_number: str | None = None
-	cart: list[Link[Product]] = Field(default_factory=list)
+	cart: list[UserCart] = Field(default_factory=list)
 	created_at: datetime.datetime = Field(default_factory=lambda: datetime.datetime.now(tz=datetime.UTC))
 
 	class Settings:
@@ -57,3 +68,6 @@ class User(Document):
 			"sub": str(self.id),
 			"exp": datetime.datetime.now(tz=datetime.UTC) + config.JWT_TOKEN_EXPIRATION,
 		}, config.JWT_SECRET_KEY, "HS256")
+
+	async def fetch_cart(self) -> list[UserCartFetched]:
+		return [UserCartFetched(product=await Product.get(cart.product_id), size=cart.size, quantity=cart.quantity) for cart in self.cart]

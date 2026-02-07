@@ -40,7 +40,7 @@ class ChangeNameRequest(BaseModel):
 
 
 @router.post("/register", response_class=fastapi.responses.ORJSONResponse)
-async def register(register_request: RegisterRequest):
+async def register(response: fastapi.Response, register_request: RegisterRequest):
 	user = User(
 		username=register_request.username,
 		email=register_request.email,
@@ -52,25 +52,37 @@ async def register(register_request: RegisterRequest):
 
 	await user.save()
 
-	return {"status": "success", "data": user.create_jwt_token()}
+	token = user.create_jwt_token()
+
+	response.set_cookie("Authorization-Token", token)
+
+	return {"status": "success", "data": token}
 
 @router.post("/login", response_class=fastapi.responses.ORJSONResponse)
-async def login(login_request: LoginRequest):
+async def login(response: fastapi.Response, login_request: LoginRequest):
 	user = await User.find_one({"username": login_request.username})
 
 	if user is None or not user.verify_password(login_request.password):
 		raise fastapi.HTTPException(status_code=fastapi.status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
-	return {"status": "success", "data": user.create_jwt_token()}
+	token = user.create_jwt_token()
+
+	response.set_cookie("Authorization-Token", token)
+
+	return {"status": "success", "data": token}
 
 @router.post("/token", response_class=fastapi.responses.ORJSONResponse)
-async def token(form_data: Annotated[OAuth2PasswordRequestForm, fastapi.Depends()]):
+async def token(response: fastapi.Response, form_data: Annotated[OAuth2PasswordRequestForm, fastapi.Depends()]):
 	user = await User.find_one({"username": form_data.username})
 
 	if user is None or not user.verify_password(form_data.password):
 		raise fastapi.HTTPException(status_code=fastapi.status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
-	return {"access_token": user.create_jwt_token(), "token_type": "bearer"}
+	token = user.create_jwt_token()
+
+	response.set_cookie("Authorization-Token", token)
+
+	return {"access_token": token, "token_type": "bearer"}
 
 @router.get("/whoami", response_class=fastapi.responses.ORJSONResponse)
 async def whoami(user: Annotated[User, fastapi.Depends(auth)]):
