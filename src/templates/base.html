@@ -11,7 +11,10 @@
 	<link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="{{ url_for('static', path='js/main.js') }}"></script>
-	<script src="{{ url_for('static', path='js/pages/' ~ request.path.split('/')[1] ~ '.js') }}"></script>
+
+	{% if request.path != "/" %}
+		<script src="{{ url_for('static', path='js/pages/' ~ request.path.split('/')[1] ~ '.js') }}"></script>
+	{% endif %}
 </head>
 
 <body>
@@ -57,16 +60,7 @@
 		</div>
 	</nav>
 
-	<div style="margin-top: 80px;"> {% with messages = get_flashed_messages(with_categories=true) %}
-		{% if messages %}
-		<div class="container mt-3">
-			{% for category, message in messages %}
-			<div class="alert alert-{{ category }}">{{ message }}</div>
-			{% endfor %}
-		</div>
-		{% endif %}
-		{% endwith %}
-
+	<div style="margin-top: 80px;">
 		{% block content %}{% endblock %}
 	</div>
 

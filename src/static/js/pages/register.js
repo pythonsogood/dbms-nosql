@@ -29,7 +29,7 @@ async function onRegisterSubmit(form) {
 	const data = await response.json();
 
 	if (!response.ok) {
-		alert(data.detail);
+		alert(JSON.stringify(data.detail));
 		return;
 	}
 

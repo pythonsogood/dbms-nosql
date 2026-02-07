@@ -35,7 +35,7 @@
 									</td>
 									<td>${{ item.product.price }}</td>
 									<td>
-										<input type="number" class="form-control form-control-sm w-50 text-center" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" onchange="cartItemQuantityChange('{{ item.product.id }}', '{{ item.size }}', this.value)">
+										<input type="number" class="form-control form-control-sm w-50 text-center" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" onchange="cartItemQuantityChange(this, '{{ item.product.id }}', '{{ item.size }}')">
 									</td>
 									<td class="text-end fw-bold">${{ item.product.price * item.quantity }}</td>
 								</tr>

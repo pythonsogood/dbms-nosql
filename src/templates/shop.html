@@ -9,24 +9,17 @@
                 <div class="mb-4">
                     <h6 class="text-uppercase small text-muted">Categories</h6>
                     <ul class="list-unstyled mt-2">
-                        <li><a href="/shop"
-                                class="text-{{ 'dark fw-bold' if not current_category else 'muted' }} text-decoration-none">All
-                                Products</a></li>
+                        <li><a href="/shop" class="text-{{ 'dark fw-bold' if not current_category else 'muted' }} text-decoration-none">All Products</a></li>
                         {% for cat in categories %}
-                        <li><a href="/shop?category={{ cat.name }}"
-                                class="text-{{ 'dark fw-bold' if current_category == cat.name else 'muted' }} text-decoration-none">{{
-                                cat.name }}</a></li>
+                        	<li><a href="/shop?category={{ cat.name|urlencode }}" class="text-{{ 'dark fw-bold' if current_category == cat.name else 'muted' }} text-decoration-none">{{ cat.name }}</a></li>
                         {% endfor %}
                     </ul>
 
                     <input type="hidden" name="category" value="{{ current_category or '' }}">
                 </div>
                 <div class="mb-4">
-                    <h6 class="text-uppercase small text-muted">Price Range (Max: $<span id="priceVal">{{ max_price or
-                            500 }}</span>)</h6>
-                    <input type="range" class="form-range mt-2" name="max_price" id="priceRange" min="0" max="1000"
-                        step="10" value="{{ max_price or 500 }}"
-                        oninput="document.getElementById('priceVal').innerText = this.value; this.form.submit()">
+                    <h6 class="text-uppercase small text-muted">Price Range (Max: $<span id="priceVal">{{ max_price or 500 }}</span>)</h6>
+                    <input type="range" class="form-range mt-2" name="max_price" id="priceRange" min="0" max="1000" step="10" value="{{ max_price or 500 }}" oninput="document.getElementById('priceVal').innerText = this.value; this.form.submit()">
                 </div>
             </form>
         </div>

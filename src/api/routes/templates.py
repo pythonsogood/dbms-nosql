@@ -12,21 +12,15 @@ router = fastapi.APIRouter()
 
 @router.get("/")
 async def index(request: fastapi.Request):
-	return templates.TemplateResponse(request=request, name="index.html", context={
-		"get_flashed_messages": lambda *args, **kwargs: []
-	})
+	return templates.TemplateResponse(request=request, name="index.html", context={})
 
 @router.get("/login")
 async def login(request: fastapi.Request):
-	return templates.TemplateResponse(request=request, name="login.html", context={
-		"get_flashed_messages": lambda *args, **kwargs: []
-	})
+	return templates.TemplateResponse(request=request, name="login.html", context={})
 
 @router.get("/register")
 async def register(request: fastapi.Request):
-	return templates.TemplateResponse(request=request, name="register.html", context={
-		"get_flashed_messages": lambda *args, **kwargs: []
-	})
+	return templates.TemplateResponse(request=request, name="register.html", context={})
 
 @router.get("/logout")
 async def logout(request: fastapi.Request):
@@ -54,10 +48,9 @@ async def shop(
 
 	products = await query.to_list()
 
-	categories = await ProductCategory.find_all().to_list()
+	categories = await ProductCategory.find_many().to_list()
 
 	return templates.TemplateResponse(request=request, name="shop.html", context={
-		"get_flashed_messages": lambda *args, **kwargs: [],
 		"products": products,
 		"categories": categories,
 		"current_category": category,
@@ -67,20 +60,32 @@ async def shop(
 
 @router.get("/admin")
 async def admin(request: fastapi.Request):
-	pipeline = [
-		{"$group": {"_id": None, "total_orders": {"$sum": 1}, "total_revenue": {"$sum": "$total_price"}}}
-	]
-	stats = await Order.aggregate(pipeline).to_list()
+	order_stats = await Order.aggregate([
+		{"$group": {
+			"_id": None,
+			"total_orders": {"$sum": 1},
+			"total_revenue": {"$sum": "$total_price"}
+		}},
+	]).to_list()
 
-	total_orders = stats[0]["total_orders"] if stats else 0
-	total_revenue = stats[0]["total_revenue"] if stats else 0
+	total_orders = order_stats[0]["total_orders"] if order_stats else 0
+	total_revenue = order_stats[0]["total_revenue"] if order_stats else 0
 
-	products = await Product.find_all().to_list()
+	product_stats = await Product.aggregate([
+		{"$group": {
+			"_id": None,
+			"total_stock": {"$sum": "$stock"},
+		}},
+	]).to_list()
+
+	total_stock = product_stats[0]["total_stock"] if product_stats else 0
+
+	products = await Product.find_many(fetch_links=True).to_list()
 
 	return templates.TemplateResponse(request=request, name="admin.html", context={
-		"get_flashed_messages": lambda *args, **kwargs: [],
 		"total_orders": total_orders,
 		"total_revenue": total_revenue,
+		"total_stock": total_stock,
 		"products": products
 	})
 
@@ -89,9 +94,7 @@ async def cart(request: fastapi.Request):
 	if request.user is None:
 		return fastapi.responses.RedirectResponse(url="/login")
 
-	return templates.TemplateResponse(request=request, name="cart.html", context={
-		"get_flashed_messages": lambda *args, **kwargs: []
-	})
+	return templates.TemplateResponse(request=request, name="cart.html", context={})
 
 @router.get("/product/{product_id}")
 async def product(request: fastapi.Request, product_id: Annotated[str, fastapi.Path()]):
@@ -101,6 +104,5 @@ async def product(request: fastapi.Request, product_id: Annotated[str, fastapi.P
 		raise fastapi.HTTPException(status_code=404, detail="Product not found")
 
 	return templates.TemplateResponse(request=request, name="product.html", context={
-		"get_flashed_messages": lambda *args, **kwargs: [],
 		"product": product,
 	})

@@ -1,11 +1,13 @@
 /**
+ * @param {HTMLInputElement} input
  * @param {string} product_id
  * @param {string} size
- * @param {number} quantity
  * @returns void
  */
-async function cartItemQuantityChange(product_id, size, quantity) {
-	const response = await fetch(`/api/shop/cart/${product_id}?size=${size}&quantity=${quantity}`, {
+async function cartItemQuantityChange(input, product_id, size) {
+	input.disabled = true;
+
+	const response = await fetch(`/api/shop/cart/${product_id}?size=${size}&quantity=${input.value}`, {
 		method: "PATCH",
 		headers: {
 			"Content-Type": "application/json"
@@ -15,9 +17,11 @@ async function cartItemQuantityChange(product_id, size, quantity) {
 	const data = await response.json();
 
 	if (!response.ok) {
-		alert(data.detail);
+		alert(JSON.stringify(data.detail));
 		return;
 	}
+
+	input.disabled = false;
 
 	window.location.reload();
 }

@@ -26,7 +26,7 @@ class AddAddressRequest(BaseModel):
 
 @router.get("/product_categories", response_class=fastapi.responses.ORJSONResponse)
 async def get_product_categories():
-	categories = await ProductCategory.find_all().to_list()
+	categories = await ProductCategory.find_many().to_list()
 
 	return {"status": "success", "data": categories}
 
@@ -45,7 +45,7 @@ async def get_products(
 	if min_price is not None and max_price is not None and min_price > max_price:
 		raise fastapi.HTTPException(status_code=fastapi.status.HTTP_400_BAD_REQUEST, detail="Invalid price range")
 
-	query = Product.find_all()
+	query = Product.find_many(fetch_links=True)
 
 	if category_filter:
 		query = query.find(In(Product.category.name, category_filter))  # pyright: ignore[reportAttributeAccessIssue]
@@ -69,21 +69,19 @@ async def get_product(product_id: Annotated[str, fastapi.Path()]):
 
 	return {"status": "success", "data": product}
 
-@router.post("/product/{product_id}/review", response_class=fastapi.responses.ORJSONResponse)
-async def add_review(user: Annotated[User, fastapi.Depends(auth)], product_id: Annotated[str, fastapi.Path()], review: PostReviewRequest):
-	product = await Product.get(PydanticObjectId(product_id))
+@router.delete("/product/{product_id}", response_class=fastapi.responses.ORJSONResponse)
+async def delete_product(product_id: Annotated[str, fastapi.Path()]):
+	product = await Product.get(PydanticObjectId(product_id), fetch_links=True)
 
 	if product is None:
-		raise fastapi.HTTPException(status_code=404, detail="Product not found")
+		raise fastapi.HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND, detail="Product not found")
 
-	product_review = Review(user=user, product=product, rating=review.rating, comment=review.comment)
+	await product.delete()
 
-	await product_review.save()
+	return {"status": "success", "data": product}
 
-	return {"status": "success", "message": "Review added"}
-
-@router.patch("/product/{product_id}/{review_id}/review", response_class=fastapi.responses.ORJSONResponse)
-async def edit_review(user: Annotated[User, fastapi.Depends(auth)], product_id: Annotated[str, fastapi.Path()], review_id: Annotated[str, fastapi.Path()], review: PostReviewRequest):
+@router.post("/product/{product_id}/review", response_class=fastapi.responses.ORJSONResponse)
+async def add_review(user: Annotated[User, fastapi.Depends(auth)], product_id: Annotated[str, fastapi.Path()], review: PostReviewRequest):
 	product = await Product.get(PydanticObjectId(product_id))
 
 	if product is None:

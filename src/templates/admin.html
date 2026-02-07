@@ -25,7 +25,7 @@
         <div class="col-md-4">
             <div class="card border-0 shadow-sm p-3">
                 <h6 class="text-muted text-uppercase small">Products in Stock</h6>
-                <h2 class="fw-bold">45</h2>
+                <h2 class="fw-bold">{{ total_stock }}</h2>
             </div>
         </div>
     </div>
@@ -47,61 +47,35 @@
                 </thead>
                 <tbody>
                     {% for product in products %}
-                    <tr>
-                        <td class="ps-4">
-                            <div class="d-flex align-items-center">
-                                <img src="{{ product.image_url }}" class="rounded me-3" width="40" height="40"
-                                    style="object-fit:cover;">
-                                <strong>{{ product.name }}</strong>
-                            </div>
-                        </td>
-                        <td><span class="badge bg-secondary">{{ product.category }}</span></td>
-                        <td>${{ product.price }}</td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <span class="me-2" id="stock-count-{{ product.id }}">{{ product.stock }}</span>
-                                <button class="btn btn-sm btn-outline-success me-1"
-                                    onclick="updateStock('{{ product.id }}', 1)">+</button>
-                                <button class="btn btn-sm btn-outline-danger"
-                                    onclick="updateStock('{{ product.id }}', -1)">-</button>
-                            </div>
-                        </td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-primary me-1"><i class="bi bi-pencil"></i></button>
-                            <form action="/delete_product/{{ product.id }}" method="POST" class="d-inline"
-                                onsubmit="return confirm('Delete this item?');">
-                                <button type="submit" class="btn btn-sm btn-outline-danger"><i
-                                        class="bi bi-trash"></i></button>
-                            </form>
-                        </td>
-                    </tr>
+						<tr>
+							<td class="ps-4">
+								<div class="d-flex align-items-center">
+									<img src="{{ product.image_url }}" class="rounded me-3" width="40" height="40"
+										style="object-fit:cover;">
+									<strong>{{ product.name }}</strong>
+								</div>
+							</td>
+							<td><span class="badge bg-secondary">{{ product.category.name }}</span></td>
+							<td>${{ product.price }}</td>
+							<td>
+								<div class="d-flex align-items-center">
+									<span class="me-2" id="stock-count-{{ product.id }}">{{ product.stock }}</span>
+									<button class="btn btn-sm btn-outline-success me-1"
+										onclick="updateStock('{{ product.id }}', 1)">+</button>
+									<button class="btn btn-sm btn-outline-danger"
+										onclick="updateStock('{{ product.id }}', -1)">-</button>
+								</div>
+							</td>
+							<td>
+								<form action="/api/shop/product/{{ product.id }}" class="d-inline" onsubmit="if (confirm('Are you sure you want to delete this product? This action cannot be undone.')) {deleteProduct(this)}; event.preventDefault(); return false;">
+									<button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+								</form>
+							</td>
+						</tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
 </div>
-
-<script>
-    async function updateStock(productId, change) {
-        try {
-            const response = await fetch(`/api/shop/product/${productId}/stock`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ change: change })
-            });
-            const data = await response.json();
-            if (data.status === 'success') {
-                document.getElementById(`stock-count-${productId}`).innerText = data.new_stock;
-            } else {
-                alert('Error updating stock: ' + data.detail);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Failed to update stock');
-        }
-    }
-</script>
 {% endblock %}
